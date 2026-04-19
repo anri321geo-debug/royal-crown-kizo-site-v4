@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   const revealElements = Array.from(document.querySelectorAll('.reveal'));
   const runtimes = [];
   const config = window.KIZO_CONFIG || {};
@@ -372,11 +372,129 @@
     revealElements.forEach((el) => revealObserver.observe(el));
   };
 
+  const initFallbackBackground = () => {
+    const host = document.getElementById('bgFx');
+    if (!host || host.querySelector('.kizo-bg-fallback-canvas')) {
+      return null;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.className = 'kizo-bg-fallback-canvas';
+    canvas.style.position = 'absolute';
+    canvas.style.inset = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.opacity = '0.85';
+    host.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      canvas.remove();
+      return null;
+    }
+
+    let width = 0;
+    let height = 0;
+    let frameId = 0;
+    let running = false;
+
+    const points = Array.from({ length: 34 }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      vx: (Math.random() - 0.5) * 0.00022,
+      vy: (Math.random() - 0.5) * 0.00022,
+      r: 1 + Math.random() * 2
+    }));
+
+    const resize = () => {
+      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+      width = host.clientWidth;
+      height = host.clientHeight;
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    const step = () => {
+      if (!running) {
+        return;
+      }
+
+      ctx.clearRect(0, 0, width, height);
+
+      points.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x <= 0 || p.x >= 1) p.vx *= -1;
+        if (p.y <= 0 || p.y >= 1) p.vy *= -1;
+      });
+
+      for (let i = 0; i < points.length; i += 1) {
+        const a = points[i];
+        const ax = a.x * width;
+        const ay = a.y * height;
+
+        ctx.beginPath();
+        ctx.arc(ax, ay, a.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(96, 156, 242, 0.28)';
+        ctx.fill();
+
+        for (let j = i + 1; j < points.length; j += 1) {
+          const b = points[j];
+          const bx = b.x * width;
+          const by = b.y * height;
+          const dx = ax - bx;
+          const dy = ay - by;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 170) {
+            const alpha = (1 - dist / 170) * 0.18;
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(bx, by);
+            ctx.strokeStyle = `rgba(78, 136, 222, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      frameId = requestAnimationFrame(step);
+    };
+
+    const runtime = {
+      start: () => {
+        if (running) return;
+        running = true;
+        frameId = requestAnimationFrame(step);
+      },
+      stop: () => {
+        running = false;
+        cancelAnimationFrame(frameId);
+      },
+      destroy: () => {
+        runtime.stop();
+        window.removeEventListener('resize', resize);
+        canvas.remove();
+      }
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+    runtime.start();
+    runtimes.push(runtime);
+    return runtime;
+  };
+
   const initInteractionAssets = () => {
-    mount(window.backgrounds?.[2], document.getElementById('bgFx'), {
+    const backgroundRuntime = mount(window.backgrounds?.[2], document.getElementById('bgFx'), {
       intensity: 0.72,
       performance: 'balanced'
     });
+    if (!backgroundRuntime) {
+      initFallbackBackground();
+    }
 
     ['callPairBtn', 'whatsappPairBtn', 'facebookPairBtn'].forEach((id) => {
       const target = document.getElementById(id);
@@ -839,9 +957,7 @@
 
     await initGallery();
 
-    if (window.backgrounds && window.buttonEffects) {
-      initInteractionAssets();
-    }
+    initInteractionAssets();
 
     document.addEventListener('visibilitychange', () => {
       runtimes.forEach((runtime) => {
