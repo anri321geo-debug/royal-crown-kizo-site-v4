@@ -1,0 +1,17 @@
+﻿[functions]
+  directory = "netlify/functions"
+
+[[redirects]]
+  from = "/api/contact"
+  to = "/.netlify/functions/contact-submit"
+  status = 200
+
+[[redirects]]
+  from = "/api/register-device"
+  to = "/.netlify/functions/register-device"
+  status = 200
+
+[[redirects]]
+  from = "/api/app-messages"
+  to = "/.netlify/functions/app-messages"
+  status = 200

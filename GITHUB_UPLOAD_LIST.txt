@@ -1,0 +1,17 @@
+﻿githubfile package includes:
+- index.html
+- styles.css
+- app.js
+- site-config.js
+- site-config.example.js
+- netlify.toml
+- admin.html
+- admin.css
+- admin.js
+- README_BACKEND.md
+- .env.example
+- assets/
+- netlify/functions/contact-submit.js
+- netlify/functions/register-device.js
+- netlify/functions/app-messages.js
+- supabase/schema.sql

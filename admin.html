@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kizo Admin | Media & Messages</title>
+  <meta name="description" content="Admin panel for Kizo Group media uploads and customer message monitoring." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-header">
+      <div>
+        <h1>Kizo Admin</h1>
+        <p>Upload media, manage gallery, and receive live customer message alerts.</p>
+      </div>
+      <button id="logoutBtn" class="btn ghost" type="button" hidden>Logout</button>
+    </header>
+
+    <section class="card" id="configNotice">
+      <h2>Configuration Check</h2>
+      <p id="configStatus">Checking configuration...</p>
+    </section>
+
+    <section class="card" id="authCard">
+      <h2>Admin Login</h2>
+      <form id="loginForm" class="grid-form" novalidate>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required placeholder="admin@example.com" />
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required placeholder="••••••••" />
+
+        <button class="btn" type="submit">Sign In</button>
+        <p id="loginStatus" class="status"></p>
+      </form>
+    </section>
+
+    <section class="card" id="mediaCard" hidden>
+      <div class="card-head">
+        <h2>Upload Media</h2>
+        <p>Images and videos are uploaded to Supabase Storage and shown on the live website gallery.</p>
+      </div>
+
+      <form id="uploadForm" class="grid-form" novalidate>
+        <label for="mediaType">Type</label>
+        <select id="mediaType" name="mediaType">
+          <option value="photo">Photo</option>
+          <option value="video">Video</option>
+        </select>
+
+        <label for="titleKa">Title (Georgian)</label>
+        <input id="titleKa" name="titleKa" type="text" required placeholder="შეიყვანეთ სათაური" />
+
+        <label for="titleEn">Title (English)</label>
+        <input id="titleEn" name="titleEn" type="text" placeholder="Enter title" />
+
+        <label for="titleRu">Title (Russian)</label>
+        <input id="titleRu" name="titleRu" type="text" placeholder="Введите заголовок" />
+
+        <label for="mediaFile">File</label>
+        <input id="mediaFile" name="mediaFile" type="file" required />
+
+        <label for="thumbFile">Thumbnail (optional for videos)</label>
+        <input id="thumbFile" name="thumbFile" type="file" />
+
+        <button class="btn" type="submit">Upload</button>
+        <p id="uploadStatus" class="status"></p>
+      </form>
+
+      <div class="list-wrap">
+        <h3>Current Media</h3>
+        <div id="mediaList" class="media-list"></div>
+      </div>
+    </section>
+
+    <section class="card" id="messagesCard" hidden>
+      <div class="card-head split">
+        <div>
+          <h2>Live Messages</h2>
+          <p>Incoming contact form messages appear here in real time.</p>
+        </div>
+        <button id="browserNotifyBtn" class="btn ghost" type="button">Enable Browser Notifications</button>
+      </div>
+      <div id="messagesList" class="message-list"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./site-config.js"></script>
+  <script src="./admin.js"></script>
+</body>
+</html>
